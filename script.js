@@ -1,86 +1,14 @@
-(() => {
-  'use strict';
-  const $ = (s, root = document) => root.querySelector(s);
-  const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  const coarse = window.matchMedia?.('(pointer: coarse)').matches;
-
-  const boot = $('#boot'), percent = $('#bootPercent'), nav = $('#nav'), title = $('#novaTitle');
-  let bootReleased = false;
-  function showSite() {
-    if (bootReleased) return;
-    bootReleased = true;
-    if (percent) percent.innerHTML = '100<span>%</span>';
-    boot?.classList.add('hide'); nav?.classList.add('show'); title?.classList.add('ready');
-    window.setTimeout(() => { if (boot) { boot.style.display = 'none'; boot.setAttribute('aria-hidden','true'); } }, reduced ? 0 : 1150);
-  }
-  ['#boot1','#boot2','#boot3','#boot4'].forEach((s,i) => { const el=$(s); if(el) setTimeout(()=>el.classList.add('show'),120+i*220); });
-  if (reduced) showSite();
-  else {
-    const duration = 1250, start = performance.now();
-    const tick = now => { const v=Math.min(1,(now-start)/duration); if(percent) percent.innerHTML=`${Math.round(v*100)}<span>%</span>`; if(v<1) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick); setTimeout(showSite,1500);
-  }
-  setTimeout(showSite,2800);
-
-  const cursor=$('#cursor'), trail=$('#cursorTrail'), label=$('#cursorLabel');
-  if(cursor && !coarse) {
-    let x=innerWidth/2,y=innerHeight/2,cx=x,cy=y,tx=x,ty=y;
-    addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;},{passive:true});
-    const loop=()=>{cx+=(x-cx)*.2;cy+=(y-cy)*.2;tx+=(x-tx)*.08;ty+=(y-ty)*.08;cursor.style.left=`${cx}px`;cursor.style.top=`${cy}px`;if(trail){trail.style.left=`${tx}px`;trail.style.top=`${ty}px`;}requestAnimationFrame(loop)};loop();
-    $$('[data-cursor],a,button').forEach(el=>{el.addEventListener('mouseenter',()=>{cursor.classList.add('active');if(label)label.textContent=el.dataset.cursor||'VIEW'});el.addEventListener('mouseleave',()=>{cursor.classList.remove('active');if(label)label.textContent=''})});
-  }
-
-  const revealItems=$$('.reveal');
-  if(!reduced && 'IntersectionObserver' in window){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ob.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -4% 0px'});revealItems.forEach(el=>ob.observe(el));}else revealItems.forEach(el=>el.classList.add('in'));
-
-  const hud=$$('#hud button');
-  hud.forEach(b=>b.addEventListener('click',()=>{const t=$(b.dataset.target);t?.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'})}));
-  const targets=hud.map(b=>$(b.dataset.target)).filter(Boolean);
-  if('IntersectionObserver' in window){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=targets.indexOf(e.target);hud.forEach(b=>b.classList.remove('active'));hud[i]?.classList.add('active')}}),{threshold:.25,rootMargin:'-15% 0px -15% 0px'});targets.forEach(t=>ob.observe(t));}
-
-  if('IntersectionObserver' in window){
-    const themes=[['#work-blvnd','blvnd'],['#work-nyx','nyx']];
-    const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const m=themes.find(a=>$(a[0])===e.target);if(m)document.body.dataset.theme=m[1]}}),{threshold:.3});
-    themes.forEach(a=>$(a[0])&&ob.observe($(a[0])));
-    ['hero','about','contact'].forEach(id=>{const el=$('#'+id);if(!el)return;const reset=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting))delete document.body.dataset.theme},{threshold:.5});reset.observe(el)});
-  }
-
-  if(!coarse&&!reduced){
-    $$('.button').forEach(b=>{b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;b.style.transform=`translate(${dx*.16}px,${dy*.2}px)`});b.addEventListener('mouseleave',()=>b.style.transform='')});
-    const frame=$('#heroFrame');frame?.addEventListener('mousemove',e=>{const r=frame.getBoundingClientRect(),px=((e.clientX-r.left)/r.width-.5)*10,py=((e.clientY-r.top)/r.height-.5)*10;frame.style.transform=`translate(${px}px,${py}px)`});frame?.addEventListener('mouseleave',()=>frame.style.transform='');
-  }
-
-  /* NOVA's signature interaction: the visitor teaches the digital NYX how to react. */
-  const pet=$('#nyxPet');
-  if(pet){
-    const eyes=$$('.eye i',pet), state=$('#nyxState'), attention=$('#nyxAttention'), interaction=$('#nyxInteraction'), prompt=$('#petPrompt'), sparks=$('#petSparks'), ring=$('#petTouchRing');
-    let count=0,holdTimer=null,held=false,idleTimer=null,lastMove=0;
-    const moods={curious:['CURIOUS','NYX IS WATCHING YOU'],happy:['HAPPY','GOOD HUMAN'],disturbed:['DISTURBED','HEY. STOP THAT.'],sleepy:['SLEEPY','NYX WENT QUIET']};
-    const mood=name=>{Object.keys(moods).forEach(k=>pet.classList.toggle(k,k===name));if(state)state.textContent=moods[name][0];if(prompt)prompt.textContent=moods[name][1]};
-    const idle=()=>{clearTimeout(idleTimer);idleTimer=setTimeout(()=>mood('sleepy'),4200)};
-    const track=(x,y)=>{const r=pet.getBoundingClientRect(),dx=Math.max(-1,Math.min(1,((x-r.left)/r.width-.5)*2)),dy=Math.max(-1,Math.min(1,((y-r.top)/r.height-.5)*2));eyes.forEach(eye=>eye.style.transform=`translate(calc(-50% + ${dx*12}px),calc(-50% + ${dy*15}px))`);if(attention)attention.textContent='TRACKING';idle()};
-    const spark=(x,y)=>{if(!sparks)return;const r=pet.getBoundingClientRect(),el=document.createElement('i');el.className='spark';el.style.left=`${x-r.left}px`;el.style.top=`${y-r.top}px`;el.style.setProperty('--dx',`${(Math.random()-.5)*90}px`);el.style.setProperty('--dy',`${(Math.random()-.5)*70}px`);sparks.appendChild(el);setTimeout(()=>el.remove(),750)};
-    const pulse=(x,y)=>{if(!ring)return;const r=pet.getBoundingClientRect();ring.style.left=`${x-r.left}px`;ring.style.top=`${y-r.top}px`;ring.classList.remove('pulse');void ring.offsetWidth;ring.classList.add('pulse')};
-    const interact=(name,x,y)=>{count++;if(interaction)interaction.textContent=String(count).padStart(2,'0');mood(name);spark(x,y);pulse(x,y);idle()};
-    pet.addEventListener('pointermove',e=>{const now=performance.now();if(now-lastMove<28)return;lastMove=now;track(e.clientX,e.clientY);if(!held)mood('curious')});
-    pet.addEventListener('pointerenter',()=>{mood('curious');if(attention)attention.textContent='LOCKED';idle()});
-    pet.addEventListener('pointerleave',()=>{eyes.forEach(e=>e.style.transform='translate(-50%,-50%)');if(attention)attention.textContent='IDLE';if(!held)mood('sleepy');clearTimeout(idleTimer)});
-    pet.addEventListener('pointerdown',e=>{held=false;interact('happy',e.clientX,e.clientY);clearTimeout(holdTimer);holdTimer=setTimeout(()=>{held=true;interact('disturbed',e.clientX,e.clientY)},650)});
-    const release=()=>{clearTimeout(holdTimer);if(held)setTimeout(()=>mood('curious'),850);held=false};pet.addEventListener('pointerup',release);pet.addEventListener('pointercancel',release);
-    pet.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;e.preventDefault();const r=pet.getBoundingClientRect();interact('happy',r.left+r.width/2,r.top+r.height/2)});
-    mood('curious');
-  }
-
-  const liveFrame=$('.live-preview iframe'), fallback=$('.preview-fallback');
-  if(liveFrame&&fallback) liveFrame.addEventListener('error',()=>fallback.style.display='flex');
-
-  /* Session identity and live clock. */
-  const sid=$('#sessionId'), clock=$('#systemTime');
-  if(sid){const key='NOVA_SESSION';let value=sessionStorage.getItem(key);if(!value){value='NOVA-'+Math.floor(1000+Math.random()*9000);sessionStorage.setItem(key,value)}sid.textContent=value}
-  const updateClock=()=>{if(clock)clock.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false})};updateClock();setInterval(updateClock,1000);
-
-  /* Subtle scroll velocity changes the system status. */
-  const sys=$('#systemState');let lastY=scrollY,lastT=performance.now();addEventListener('scroll',()=>{const now=performance.now(),speed=Math.abs(scrollY-lastY)/(now-lastT);if(sys)sys.textContent=speed>.7?'MOVING':'ONLINE';lastY=scrollY;lastT=now},{passive:true});
-  addEventListener('keydown',e=>{if(e.key==='Escape')document.activeElement?.blur()});
-})();
+(()=>{'use strict';const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,coarse=window.matchMedia?.('(pointer: coarse)').matches;
+const boot=$('#boot'),percent=$('#bootPercent'),nav=$('#nav'),title=$('#novaTitle');let bootReleased=false;function showSite(){if(bootReleased)return;bootReleased=true;if(percent)percent.innerHTML='100<span>%</span>';boot?.classList.add('hide');nav?.classList.add('show');title?.classList.add('ready');setTimeout(()=>{if(boot){boot.style.display='none';boot.setAttribute('aria-hidden','true')}},reduced?0:1150)}['#boot1','#boot2','#boot3','#boot4'].forEach((s,i)=>{const e=$(s);if(e)setTimeout(()=>e.classList.add('show'),120+i*220)});if(reduced)showSite();else{const d=1250,st=performance.now();const tick=n=>{const v=Math.min(1,(n-st)/d);if(percent)percent.innerHTML=`${Math.round(v*100)}<span>%</span>`;if(v<1)requestAnimationFrame(tick)};requestAnimationFrame(tick);setTimeout(showSite,1500)}setTimeout(showSite,2800);
+const cursor=$('#cursor'),trail=$('#cursorTrail'),label=$('#cursorLabel');let mouseX=innerWidth/2,mouseY=innerHeight/2;if(cursor&&!coarse){let cx=mouseX,cy=mouseY,tx=cx,ty=cy;addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY},{passive:true});const loop=()=>{cx+=(mouseX-cx)*.2;cy+=(mouseY-cy)*.2;tx+=(mouseX-tx)*.08;ty+=(mouseY-ty)*.08;cursor.style.left=`${cx}px`;cursor.style.top=`${cy}px`;if(trail){trail.style.left=`${tx}px`;trail.style.top=`${ty}px`}requestAnimationFrame(loop)};loop();$$('[data-cursor],a,button').forEach(e=>{e.addEventListener('mouseenter',()=>{cursor.classList.add('active');if(label)label.textContent=e.dataset.cursor||'VIEW'});e.addEventListener('mouseleave',()=>{cursor.classList.remove('active');if(label)label.textContent=''})})}
+const revealItems=$$('.reveal');if(!reduced&&'IntersectionObserver'in window){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ob.unobserve(e.target)}}),{threshold:.08,rootMargin:'0px 0px -4% 0px'});revealItems.forEach(e=>ob.observe(e))}else revealItems.forEach(e=>e.classList.add('in'));
+const hud=$$('#hud button');hud.forEach(b=>b.addEventListener('click',()=>$(b.dataset.target)?.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'})));const targets=hud.map(b=>$(b.dataset.target)).filter(Boolean);if('IntersectionObserver'in window){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=targets.indexOf(e.target);hud.forEach(b=>b.classList.remove('active'));hud[i]?.classList.add('active')}}),{threshold:.25,rootMargin:'-15% 0px -15% 0px'});targets.forEach(t=>ob.observe(t));const themes=[['#work-blvnd','blvnd'],['#work-nyx','nyx']];const tb=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const m=themes.find(a=>$(a[0])===e.target);if(m)document.body.dataset.theme=m[1]}}),{threshold:.3});themes.forEach(a=>$(a[0])&&tb.observe($(a[0])));['hero','about','contact'].forEach(id=>{const e=$('#'+id);if(!e)return;const rb=new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting))delete document.body.dataset.theme},{threshold:.5});rb.observe(e)})}
+if(!coarse&&!reduced){$$('.button').forEach(b=>{b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2;b.style.transform=`translate(${dx*.16}px,${dy*.2}px)`});b.addEventListener('mouseleave',()=>b.style.transform='')});const frame=$('#heroFrame');frame?.addEventListener('mousemove',e=>{const r=frame.getBoundingClientRect(),px=((e.clientX-r.left)/r.width-.5)*10,py=((e.clientY-r.top)/r.height-.5)*10;frame.style.transform=`translate(${px}px,${py}px)`});frame?.addEventListener('mouseleave',()=>frame.style.transform='')}
+/* Identity Field. The hero responds to cursor velocity, proximity and repeated visits. */
+const name=$('#identityName'),nameLetters=$$('#identityName span');const heroState=$('#heroState'),visitorMode=$('#visitorMode'),signal=$('#identitySignal');let activity=0,lastPX=mouseX,lastPY=mouseY,lastPT=performance.now(),heroClicks=0;const setHeroState=(s)=>{if(heroState)heroState.textContent=s};if(name){nameLetters.forEach((l,i)=>{l.dataset.i=i});name.addEventListener('click',()=>{heroClicks++;activity++;name.classList.remove('glitch');void name.offsetWidth;name.classList.add('glitch');setHeroState(heroClicks>=3?'SYNCHRONIZED':'CONNECTED');if(visitorMode)visitorMode.textContent=heroClicks>=3?'IDENTITY LINKED':'INTERACTING';if(heroClicks===3){document.body.classList.add('nova-private');setTimeout(()=>document.body.classList.remove('nova-private'),1900)}})}
+addEventListener('mousemove',e=>{if(!name||coarse)return;const now=performance.now(),dt=Math.max(16,now-lastPT),vx=(e.clientX-lastPX)/dt,vy=(e.clientY-lastPY)/dt,speed=Math.min(1,Math.hypot(vx,vy)*2.5);lastPX=e.clientX;lastPY=e.clientY;lastPT=now;const r=name.getBoundingClientRect();if(e.clientY>r.top-70&&e.clientY<r.bottom+70&&e.clientX>r.left-70&&e.clientX<r.right+70){nameLetters.forEach((l,i)=>{const lr=l.getBoundingClientRect(),d=Math.hypot(e.clientX-(lr.left+lr.width/2),e.clientY-(lr.top+lr.height/2)),pull=Math.max(0,1-d/150);l.style.transform=`translate(${(e.clientX-(lr.left+lr.width/2))*.025*pull}px,${(e.clientY-(lr.top+lr.height/2))*.08*pull}px) scale(${1+pull*.18})`;l.style.color=pull>.55?'var(--ice)':''});activity++;setHeroState(speed>.55?'ENERGIZED':'OBSERVING');if(signal)signal.style.transform=`scaleX(${.25+Math.min(1,activity/90)*.75})`}else{nameLetters.forEach(l=>{l.style.transform='';l.style.color=''})}} ,{passive:true});
+const sid=$('#sessionId'),clock=$('#systemTime');if(sid){const key='NOVA_SESSION';let v=sessionStorage.getItem(key);if(!v){v='NOVA-'+Math.floor(1000+Math.random()*9000);sessionStorage.setItem(key,v);if(visitorMode)visitorMode.textContent='FIRST CONTACT'}else if(visitorMode)visitorMode.textContent='RETURNING SESSION';sid.textContent=v}const updateClock=()=>{if(clock)clock.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false})};updateClock();setInterval(updateClock,1000);
+/* Hidden N sequence. Three hero name clicks enter a short private visual state. */
+const style=document.createElement('style');style.textContent='.nova-private:after{content:"IDENTITY SYNCHRONIZED";position:fixed;inset:0;z-index:980;display:grid;place-items:center;background:rgba(8,9,11,.88);color:var(--ice);font:10px var(--mono);letter-spacing:.35em;pointer-events:none;animation:privatePulse 1.9s ease both}@keyframes privatePulse{0%{opacity:0}25%,75%{opacity:1}100%{opacity:0}}';document.head.appendChild(style);
+/* NYX */const pet=$('#nyxPet');if(pet){const eyes=$$('.eye i',pet),state=$('#nyxState'),attention=$('#nyxAttention'),interaction=$('#nyxInteraction'),prompt=$('#petPrompt'),sparks=$('#petSparks'),ring=$('#petTouchRing');let count=0,holdTimer=null,held=false,idleTimer=null,lastMove=0;const moods={curious:['CURIOUS','NYX IS WATCHING YOU'],happy:['HAPPY','GOOD HUMAN'],disturbed:['DISTURBED','HEY. STOP THAT.'],sleepy:['SLEEPY','NYX WENT QUIET']};const mood=n=>{Object.keys(moods).forEach(k=>pet.classList.toggle(k,k===n));if(state)state.textContent=moods[n][0];if(prompt)prompt.textContent=moods[n][1]};const idle=()=>{clearTimeout(idleTimer);idleTimer=setTimeout(()=>mood('sleepy'),4200)};const track=(x,y)=>{const r=pet.getBoundingClientRect(),dx=Math.max(-1,Math.min(1,((x-r.left)/r.width-.5)*2)),dy=Math.max(-1,Math.min(1,((y-r.top)/r.height-.5)*2));eyes.forEach(e=>e.style.transform=`translate(calc(-50% + ${dx*12}px),calc(-50% + ${dy*15}px))`);if(attention)attention.textContent='TRACKING';idle()};const spark=(x,y)=>{if(!sparks)return;const r=pet.getBoundingClientRect(),e=document.createElement('i');e.className='spark';e.style.left=`${x-r.left}px`;e.style.top=`${y-r.top}px`;e.style.setProperty('--dx',`${(Math.random()-.5)*90}px`);e.style.setProperty('--dy',`${(Math.random()-.5)*70}px`);sparks.appendChild(e);setTimeout(()=>e.remove(),750)};const pulse=(x,y)=>{if(!ring)return;const r=pet.getBoundingClientRect();ring.style.left=`${x-r.left}px`;ring.style.top=`${y-r.top}px`;ring.classList.remove('pulse');void ring.offsetWidth;ring.classList.add('pulse')};const interact=(n,x,y)=>{count++;if(interaction)interaction.textContent=String(count).padStart(2,'0');mood(n);spark(x,y);pulse(x,y);idle()};pet.addEventListener('pointermove',e=>{const now=performance.now();if(now-lastMove<28)return;lastMove=now;track(e.clientX,e.clientY);if(!held)mood('curious')});pet.addEventListener('pointerenter',()=>{mood('curious');if(attention)attention.textContent='LOCKED';idle()});pet.addEventListener('pointerleave',()=>{eyes.forEach(e=>e.style.transform='translate(-50%,-50%)');if(attention)attention.textContent='IDLE';if(!held)mood('sleepy');clearTimeout(idleTimer)});pet.addEventListener('pointerdown',e=>{held=false;interact('happy',e.clientX,e.clientY);clearTimeout(holdTimer);holdTimer=setTimeout(()=>{held=true;interact('disturbed',e.clientX,e.clientY)},650)});const release=()=>{clearTimeout(holdTimer);if(held)setTimeout(()=>mood('curious'),850);held=false};pet.addEventListener('pointerup',release);pet.addEventListener('pointercancel',release);pet.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;e.preventDefault();const r=pet.getBoundingClientRect();interact('happy',r.left+r.width/2,r.top+r.height/2)});mood('curious')}
+const liveFrame=$('.live-preview iframe'),fallback=$('.preview-fallback');if(liveFrame&&fallback)liveFrame.addEventListener('error',()=>fallback.style.display='flex');const sys=$('#systemState');let lastY=scrollY,lastT=performance.now();addEventListener('scroll',()=>{const now=performance.now(),speed=Math.abs(scrollY-lastY)/(now-lastT);if(sys)sys.textContent=speed>.7?'MOVING':'ONLINE';lastY=scrollY;lastT=now},{passive:true});addEventListener('keydown',e=>{if(e.key==='Escape')document.activeElement?.blur()});})();
