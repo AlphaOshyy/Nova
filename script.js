@@ -1,47 +1,58 @@
 (() => {
   'use strict';
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const coarse = window.matchMedia('(pointer: coarse)').matches;
-  const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
+  /* BOOT LOADER, deliberately self contained so the page never remains blocked. */
   const boot = $('#boot');
+  const percent = $('#bootPercent');
   const nav = $('#nav');
   const title = $('#novaTitle');
-  const percent = $('#bootPercent');
 
-  function finishBoot() {
-    if (!boot) return;
-    boot.classList.add('hide');
-    nav?.classList.add('show');
-    title?.classList.add('ready');
-    window.setTimeout(() => { boot.style.display = 'none'; }, reduced ? 0 : 1150);
-  }
-
-  if (reduced || !boot) {
+  function showSite() {
     if (percent) percent.innerHTML = '100<span>%</span>';
-    title?.classList.add('ready');
-    nav?.classList.add('show');
-    if (boot) boot.style.display = 'none';
-  } else {
-    const lines = ['#boot1', '#boot2', '#boot3', '#boot4'].map($);
-    let delay = 180;
-    lines.forEach(line => {
-      window.setTimeout(() => line?.classList.add('show'), delay);
-      delay += 330;
-    });
-    const duration = 1500;
-    const start = performance.now();
-    function progress(now) {
-      const value = Math.min(1, (now - start) / duration);
-      if (percent) percent.innerHTML = `${Math.round(value * 100)}<span>%</span>`;
-      if (value < 1) requestAnimationFrame(progress);
+    if (boot) {
+      boot.classList.add('hide');
+      window.setTimeout(() => {
+        boot.style.display = 'none';
+        boot.setAttribute('aria-hidden', 'true');
+      }, reduced ? 0 : 1150);
     }
-    requestAnimationFrame(progress);
-    window.setTimeout(finishBoot, duration + 300);
+    if (nav) nav.classList.add('show');
+    if (title) title.classList.add('ready');
   }
 
+  if (boot) {
+    ['#boot1', '#boot2', '#boot3', '#boot4'].forEach((selector, index) => {
+      const line = $(selector);
+      if (line) window.setTimeout(() => line.classList.add('show'), 120 + index * 260);
+    });
+
+    if (reduced) {
+      showSite();
+    } else {
+      const duration = 1400;
+      const started = performance.now();
+      const progress = now => {
+        const value = Math.min(1, (now - started) / duration);
+        if (percent) percent.innerHTML = `${Math.round(value * 100)}<span>%</span>`;
+        if (value < 1) window.requestAnimationFrame(progress);
+      };
+      window.requestAnimationFrame(progress);
+      window.setTimeout(showSite, duration + 250);
+    }
+  } else {
+    nav?.classList.add('show');
+    title?.classList.add('ready');
+  }
+
+  /* Safety watchdog. Even if another interaction throws later, boot is never permanent. */
+  window.setTimeout(showSite, 2800);
+
+  /* CUSTOM CURSOR */
   const cursor = $('#cursor');
   const cursorLabel = $('#cursorLabel');
   if (cursor && !coarse) {
@@ -49,33 +60,30 @@
     let y = innerHeight / 2;
     let cx = x;
     let cy = y;
-    addEventListener('mousemove', event => {
-      x = event.clientX;
-      y = event.clientY;
-    }, { passive: true });
-    function cursorLoop() {
+    window.addEventListener('mousemove', e => { x = e.clientX; y = e.clientY; }, { passive: true });
+    const loop = () => {
       cx += (x - cx) * 0.2;
       cy += (y - cy) * 0.2;
       cursor.style.left = `${cx}px`;
       cursor.style.top = `${cy}px`;
-      requestAnimationFrame(cursorLoop);
-    }
-    cursorLoop();
-
-    $$('[data-cursor], a, button').forEach(element => {
-      element.addEventListener('mouseenter', () => {
+      window.requestAnimationFrame(loop);
+    };
+    loop();
+    $$('[data-cursor], a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => {
         cursor.classList.add('active');
-        if (cursorLabel) cursorLabel.textContent = element.dataset.cursor || (element.target === '_blank' ? 'OPEN' : 'VIEW');
+        if (cursorLabel) cursorLabel.textContent = el.dataset.cursor || (el.target === '_blank' ? 'OPEN' : 'VIEW');
       });
-      element.addEventListener('mouseleave', () => {
+      el.addEventListener('mouseleave', () => {
         cursor.classList.remove('active');
         if (cursorLabel) cursorLabel.textContent = '';
       });
     });
   }
 
+  /* SCROLL REVEALS */
   const revealItems = $$('.reveal');
-  if ('IntersectionObserver' in window && !reduced) {
+  if (!reduced && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -83,16 +91,17 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
-    revealItems.forEach(item => observer.observe(item));
+    }, { threshold: 0.08, rootMargin: '0px 0px -4% 0px' });
+    revealItems.forEach(el => observer.observe(el));
   } else {
-    revealItems.forEach(item => item.classList.add('in'));
+    revealItems.forEach(el => el.classList.add('in'));
   }
 
+  /* HUD */
   const hud = $$('#hud button');
   hud.forEach(button => button.addEventListener('click', () => {
     const target = $(button.dataset.target);
-    target?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    if (target) target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
   }));
   const hudTargets = hud.map(button => $(button.dataset.target)).filter(Boolean);
   if ('IntersectionObserver' in window) {
@@ -101,60 +110,62 @@
         if (!entry.isIntersecting) return;
         const index = hudTargets.indexOf(entry.target);
         hud.forEach(item => item.classList.remove('active'));
-        hud[index]?.classList.add('active');
+        if (hud[index]) hud[index].classList.add('active');
       });
-    }, { threshold: 0.3, rootMargin: '-15% 0px -15% 0px' });
-    hudTargets.forEach(target => hudObserver.observe(target));
+    }, { threshold: 0.25, rootMargin: '-15% 0px -15% 0px' });
+    hudTargets.forEach(el => hudObserver.observe(el));
   }
 
-  const themePairs = [
-    ['#work-blvnd', 'blvnd'],
-    ['#work-nyx', 'nyx']
-  ];
+  /* PROJECT BACKDROP */
   if ('IntersectionObserver' in window) {
+    const themes = [
+      ['#work-blvnd', 'blvnd'],
+      ['#work-nyx', 'nyx']
+    ];
     const themeObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
-        const pair = themePairs.find(([selector]) => $(selector) === entry.target);
-        if (pair) document.body.dataset.theme = pair[1];
+        const match = themes.find(item => $(item[0]) === entry.target);
+        if (match) document.body.dataset.theme = match[1];
       });
-    }, { threshold: 0.28 });
-    themePairs.forEach(([selector]) => {
-      const element = $(selector);
-      if (element) themeObserver.observe(element);
+    }, { threshold: 0.3 });
+    themes.forEach(item => {
+      const el = $(item[0]);
+      if (el) themeObserver.observe(el);
     });
     ['hero', 'recognition', 'about', 'contact'].forEach(id => {
-      const element = document.getElementById(id);
-      if (!element) return;
-      const reset = new IntersectionObserver(entries => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const resetObserver = new IntersectionObserver(entries => {
         if (entries.some(entry => entry.isIntersecting)) delete document.body.dataset.theme;
       }, { threshold: 0.5 });
-      reset.observe(element);
+      resetObserver.observe(el);
     });
   }
 
+  /* MAGNETIC BUTTONS AND HERO FRAME */
   if (!coarse && !reduced) {
     $$('.button').forEach(button => {
-      button.addEventListener('mousemove', event => {
-        const rect = button.getBoundingClientRect();
-        const dx = event.clientX - rect.left - rect.width / 2;
-        const dy = event.clientY - rect.top - rect.height / 2;
-        button.style.transform = `translate(${dx * 0.18}px, ${dy * 0.24}px)`;
+      button.addEventListener('mousemove', e => {
+        const r = button.getBoundingClientRect();
+        const dx = e.clientX - r.left - r.width / 2;
+        const dy = e.clientY - r.top - r.height / 2;
+        button.style.transform = `translate(${dx * 0.16}px, ${dy * 0.2}px)`;
       });
       button.addEventListener('mouseleave', () => { button.style.transform = ''; });
     });
 
-    const portrait = $('[data-parallax]');
-    portrait?.addEventListener('mousemove', event => {
-      const rect = portrait.getBoundingClientRect();
-      const px = ((event.clientX - rect.left) / rect.width - 0.5) * 10;
-      const py = ((event.clientY - rect.top) / rect.height - 0.5) * 10;
-      portrait.style.transform = `translate(${px}px, ${py}px)`;
+    const frame = $('.hero-frame');
+    frame?.addEventListener('mousemove', e => {
+      const r = frame.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width - 0.5) * 10;
+      const py = ((e.clientY - r.top) / r.height - 0.5) * 10;
+      frame.style.transform = `translate(${px}px, ${py}px)`;
     });
-    portrait?.addEventListener('mouseleave', () => { portrait.style.transform = ''; });
+    frame?.addEventListener('mouseleave', () => { frame.style.transform = ''; });
   }
 
-  // NYX WEB PET. The same interaction language will later map to the physical NYX robot.
+  /* NYX INTERACTIVE WEB PET */
   const pet = $('#nyxPet');
   if (pet) {
     const eyes = $$('.eye i', pet);
@@ -165,117 +176,101 @@
     const sparks = $('#petSparks');
     let count = 0;
     let holdTimer = null;
-    let holdStarted = false;
+    let held = false;
     let lastMove = 0;
 
     const moods = {
-      curious: { label: 'CURIOUS', prompt: 'NYX IS WATCHING YOU' },
-      happy: { label: 'HAPPY', prompt: 'GOOD HUMAN' },
-      disturbed: { label: 'DISTURBED', prompt: 'HEY. STOP THAT.' },
-      sleepy: { label: 'SLEEPY', prompt: 'NYX IS GETTING TIRED' }
+      curious: ['CURIOUS', 'NYX IS WATCHING YOU'],
+      happy: ['HAPPY', 'GOOD HUMAN'],
+      disturbed: ['DISTURBED', 'HEY. STOP THAT.'],
+      sleepy: ['SLEEPY', 'NYX IS GETTING TIRED']
     };
 
-    function setMood(name) {
+    function mood(name) {
       Object.keys(moods).forEach(key => pet.classList.toggle(key, key === name));
-      if (state) state.textContent = moods[name].label;
-      if (prompt) prompt.textContent = moods[name].prompt;
+      if (state) state.textContent = moods[name][0];
+      if (prompt) prompt.textContent = moods[name][1];
     }
 
-    function setEyes(clientX, clientY) {
-      const rect = pet.getBoundingClientRect();
-      const nx = (clientX - rect.left) / rect.width;
-      const ny = (clientY - rect.top) / rect.height;
-      const dx = Math.max(-1, Math.min(1, (nx - 0.5) * 2));
-      const dy = Math.max(-1, Math.min(1, (ny - 0.5) * 2));
+    function track(x, y) {
+      const r = pet.getBoundingClientRect();
+      const dx = Math.max(-1, Math.min(1, ((x - r.left) / r.width - 0.5) * 2));
+      const dy = Math.max(-1, Math.min(1, ((y - r.top) / r.height - 0.5) * 2));
       eyes.forEach(eye => {
         eye.style.transform = `translate(calc(-50% + ${dx * 12}px), calc(-50% + ${dy * 15}px))`;
       });
       if (attention) attention.textContent = 'TRACKING';
     }
 
-    function spawnSpark(clientX, clientY) {
+    function spark(x, y) {
       if (!sparks) return;
-      const rect = pet.getBoundingClientRect();
-      const spark = document.createElement('i');
-      spark.className = 'spark';
-      spark.style.left = `${clientX - rect.left}px`;
-      spark.style.top = `${clientY - rect.top}px`;
-      spark.style.setProperty('--dx', `${(Math.random() - 0.5) * 90}px`);
-      spark.style.setProperty('--dy', `${(Math.random() - 0.5) * 70}px`);
-      sparks.appendChild(spark);
-      window.setTimeout(() => spark.remove(), 750);
+      const r = pet.getBoundingClientRect();
+      const el = document.createElement('i');
+      el.className = 'spark';
+      el.style.left = `${x - r.left}px`;
+      el.style.top = `${y - r.top}px`;
+      el.style.setProperty('--dx', `${(Math.random() - 0.5) * 90}px`);
+      el.style.setProperty('--dy', `${(Math.random() - 0.5) * 70}px`);
+      sparks.appendChild(el);
+      window.setTimeout(() => el.remove(), 750);
     }
 
-    function interact(mood, event) {
+    function interact(name, x, y) {
       count += 1;
       if (interaction) interaction.textContent = String(count).padStart(2, '0');
-      setMood(mood);
-      spawnSpark(event.clientX, event.clientY);
-      if (pet.animate && mood === 'disturbed') pet.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.025)' }, { transform: 'scale(1)' }], { duration: 280, iterations: 2 });
+      mood(name);
+      spark(x, y);
     }
 
-    pet.addEventListener('pointermove', event => {
+    pet.addEventListener('pointermove', e => {
       const now = performance.now();
-      if (now - lastMove < 28) return;
+      if (now - lastMove < 30) return;
       lastMove = now;
-      setEyes(event.clientX, event.clientY);
-      if (!holdStarted) setMood('curious');
+      track(e.clientX, e.clientY);
+      if (!held) mood('curious');
     });
 
-    pet.addEventListener('pointerenter', () => {
-      if (attention) attention.textContent = 'LOCKED';
-      setMood('curious');
-    });
-
+    pet.addEventListener('pointerenter', () => mood('curious'));
     pet.addEventListener('pointerleave', () => {
-      eyes.forEach(eye => { eye.style.transform = 'translate(-50%,-50%)'; });
+      eyes.forEach(eye => { eye.style.transform = 'translate(-50%, -50%)'; });
       if (attention) attention.textContent = 'IDLE';
-      if (!holdStarted) setMood('sleepy');
+      if (!held) mood('sleepy');
     });
 
-    pet.addEventListener('pointerdown', event => {
-      holdStarted = false;
-      interact('happy', event);
+    pet.addEventListener('pointerdown', e => {
+      held = false;
+      interact('happy', e.clientX, e.clientY);
       holdTimer = window.setTimeout(() => {
-        holdStarted = true;
-        interact('disturbed', event);
+        held = true;
+        interact('disturbed', e.clientX, e.clientY);
       }, 650);
     });
 
-    pet.addEventListener('pointerup', () => {
+    const release = () => {
       if (holdTimer) window.clearTimeout(holdTimer);
-      if (holdStarted) window.setTimeout(() => setMood('curious'), 900);
+      if (held) window.setTimeout(() => mood('curious'), 850);
+    };
+    pet.addEventListener('pointerup', release);
+    pet.addEventListener('pointercancel', release);
+
+    pet.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      const r = pet.getBoundingClientRect();
+      interact('happy', r.left + r.width / 2, r.top + r.height / 2);
     });
 
-    pet.addEventListener('pointercancel', () => {
-      if (holdTimer) window.clearTimeout(holdTimer);
-    });
-
-    pet.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        const rect = pet.getBoundingClientRect();
-        interact('happy', { clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2 });
-      }
-    });
-
-    setMood('curious');
+    mood('curious');
   }
 
-  const frame = $('.live-preview iframe');
-  const fallback = $('.preview-fallback');
-  if (frame && fallback) {
-    frame.addEventListener('error', () => { fallback.style.display = 'flex'; });
-    window.setTimeout(() => {
-      try {
-        if (!frame.contentDocument || frame.contentDocument.body?.children.length === 0) fallback.style.display = 'flex';
-      } catch (_) {
-        // Cross-origin content is expected. Leave the live frame visible.
-      }
-    }, 5000);
+  /* LIVE BLVND PREVIEW. Cross origin is expected, so do not inspect contentDocument. */
+  const liveFrame = $('.live-preview iframe');
+  const liveFallback = $('.preview-fallback');
+  if (liveFrame && liveFallback) {
+    liveFrame.addEventListener('error', () => { liveFallback.style.display = 'flex'; });
   }
 
-  addEventListener('keydown', event => {
-    if (event.key === 'Escape') document.activeElement?.blur();
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.activeElement?.blur();
   });
 })();
