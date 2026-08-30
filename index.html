@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOVA | Software Engineering & Creative Technology</title>
-<meta name="description" content="Nova's personal portfolio featuring software, web experiences and interactive technology projects, BLVND and NYX.">
-<meta name="keywords" content="Nova, Oshan Tanusha, software engineering, web development, Sri Lanka, Arduino, robotics, creative technology, BLVND, NYX">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA | Software Engineering and Creative Technology</title>
+<meta name="description" content="Nova's portfolio of software, web experiences, embedded systems and creative technology. Featuring BLVND and NYX.">
+<meta name="keywords" content="Nova, Oshan Tanusha, software engineering, web development, Sri Lanka, Arduino, robotics, BLVND, NYX, creative technology">
 <meta name="theme-color" content="#08090b">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,76 +14,175 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<a href="#hero" class="skip-link">Skip to content</a>
-<div class="stage-bg" aria-hidden="true"><div class="layer default"></div><div class="layer blvnd"></div><div class="layer nyx"></div></div>
-<svg class="grain" aria-hidden="true"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#noiseFilter)"/></svg>
-<div id="boot" role="status" aria-label="Loading NOVA">
-  <div class="panel left"></div><div class="panel right"></div>
-  <div class="boot-inner">
-    <div class="line" id="l1">&gt; INITIALIZING NOVA<span class="cursor-blink" style="display:none" id="c1"></span></div>
-    <div class="line" id="l2">&gt; LOADING IDENTITY MODULE <span class="ok" style="display:none" id="o2">[OK]</span></div>
-    <div class="line" id="l3">&gt; MOUNTING PROJECTS: BLVND, NYX <span class="ok" style="display:none" id="o3">[OK]</span></div>
-    <div class="line" id="l4">&gt; READY<span class="cursor-blink" id="c4"></span></div>
+<a class="skip-link" href="#hero">Skip to content</a>
+<div class="noise" aria-hidden="true"></div>
+<div class="stage-bg" aria-hidden="true"><span class="stage default"></span><span class="stage pink"></span><span class="stage orange"></span></div>
+
+<div id="boot" aria-label="Loading NOVA" role="status">
+  <div class="boot-panel boot-left"></div><div class="boot-panel boot-right"></div>
+  <div class="boot-copy">
+    <p id="boot1">&gt; INITIALIZING NOVA</p>
+    <p id="boot2">&gt; LOADING IDENTITY <b>[OK]</b></p>
+    <p id="boot3">&gt; MOUNTING BLVND / NYX <b>[OK]</b></p>
+    <p id="boot4">&gt; SYSTEM READY<span class="blink"></span></p>
   </div>
-  <div class="pct" id="pct">0<span>%</span></div>
+  <div class="boot-percent" id="bootPercent">0<span>%</span></div>
 </div>
-<div class="cur" id="cur"><span class="label" id="curLabel"></span></div>
+
+<div class="cursor" id="cursor"><span id="cursorLabel"></span></div>
+
 <nav id="nav">
-  <a href="#hero" class="logo">NOVA</a>
-  <ul><li><a href="#work" data-hover>Work</a></li><li><a href="#about" data-hover>About</a></li><li><a href="#resume" data-hover>Resume</a></li><li><a href="#contact" data-hover>Contact</a></li></ul>
+  <a href="#hero" class="brand">NOVA</a>
+  <ul>
+    <li><a href="#work" data-cursor="VIEW">Work</a></li>
+    <li><a href="#recognition" data-cursor="VIEW">Recognition</a></li>
+    <li><a href="#about" data-cursor="VIEW">About</a></li>
+    <li><a href="#contact" data-cursor="VIEW">Contact</a></li>
+  </ul>
 </nav>
-<div id="hud" aria-hidden="true">
-  <div class="dot-row" data-target="#hero" data-hover><span class="dot-label">Intro</span><span class="dot"></span></div>
-  <div class="dot-row" data-target="#work-blvnd" data-hover><span class="dot-label">01 BLVND</span><span class="dot"></span></div>
-  <div class="dot-row" data-target="#work-nyx" data-hover><span class="dot-label">02 NYX</span><span class="dot"></span></div>
-  <div class="dot-row" data-target="#about" data-hover><span class="dot-label">About</span><span class="dot"></span></div>
-  <div class="dot-row" data-target="#resume" data-hover><span class="dot-label">Resume</span><span class="dot"></span></div>
-  <div class="dot-row" data-target="#contact" data-hover><span class="dot-label">Contact</span><span class="dot"></span></div>
+
+<div class="hud" id="hud" aria-hidden="true">
+  <button data-target="#hero"><span>Intro</span><i></i></button>
+  <button data-target="#work-blvnd"><span>01 BLVND</span><i></i></button>
+  <button data-target="#work-nyx"><span>02 NYX</span><i></i></button>
+  <button data-target="#recognition"><span>Award</span><i></i></button>
+  <button data-target="#about"><span>About</span><i></i></button>
+  <button data-target="#contact"><span>Contact</span><i></i></button>
 </div>
-<section id="hero">
+
+<main>
+<section id="hero" class="hero section">
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">Software Engineering <em>·</em> Creative Technology</p>
-      <h1 class="nova" id="novaTitle" aria-label="NOVA"><span class="ch">N</span><span class="ch">O</span><span class="ch">V</span><span class="ch">A</span></h1>
-      <div class="roles"><span>Software</span><span>Interaction</span><span>Embedded Systems</span></div>
-      <p class="tag">Building digital experiences and interactive systems, from web to hardware.</p>
-      <div class="hero-cta"><a href="#work" class="btn solid" data-hover>View Work</a><a href="#about" class="btn" data-hover>About Me</a></div>
+      <h1 class="nova-title" id="novaTitle" aria-label="NOVA"><span>N</span><span>O</span><span>V</span><span>A</span></h1>
+      <div class="role-strip"><span>Software</span><span>Interaction</span><span>Embedded Systems</span></div>
+      <p class="hero-line">I build digital experiences and interactive systems, from the screen to the hardware.</p>
+      <div class="hero-actions">
+        <a href="#work" class="button primary" data-cursor="VIEW">View work <span>↘</span></a>
+        <a href="#about" class="button" data-cursor="VIEW">About me</a>
+      </div>
     </div>
-    <div class="hero-portrait" data-parallax>
-      <div class="tag-corner tc1">NOVA / 01</div>
-      <div class="frame-note">PORTRAIT FRAME<br>EDITORIAL / 2026</div>
-      <div class="portrait-mark"><img src="logo.svg" alt="NOVA logo"><span>OS / NOVA</span></div>
-      <div class="portrait-scan"></div>
-      <div class="tag-corner tc2">LK / 2026</div>
+
+    <div class="hero-frame" data-parallax aria-label="Portrait placeholder">
+      <div class="frame-corner top-left">NOVA / 01</div>
+      <div class="frame-corner top-right">PORTRAIT SLOT<br>2026</div>
+      <div class="hero-placeholder">
+        <div class="placeholder-cross"><span></span><span></span></div>
+        <img src="logo.svg" alt="NOVA logo">
+        <p>YOUR PORTRAIT<br>GOES HERE</p>
+      </div>
+      <div class="scan-line"></div>
+      <div class="frame-corner bottom-left">EDITORIAL FRAME</div>
+      <div class="frame-corner bottom-right">LK / 2026</div>
     </div>
   </div>
-  <div class="scroll-cue"><div class="bar"></div>SCROLL</div>
+  <div class="scroll-cue"><i></i>SCROLL</div>
 </section>
-<div class="ticker" aria-hidden="true"><div class="track">
-  <span>Software Engineering Student</span><span class="dot-sep">•</span><span>Creative Technologist</span><span class="dot-sep">•</span><span>NIBM / 24.3F</span><span class="dot-sep">•</span><span>BLVND</span><span class="dot-sep">•</span><span>NYX</span><span class="dot-sep">•</span><span>Sri Lanka</span><span class="dot-sep">•</span>
-  <span>Software Engineering Student</span><span class="dot-sep">•</span><span>Creative Technologist</span><span class="dot-sep">•</span><span>NIBM / 24.3F</span><span class="dot-sep">•</span><span>BLVND</span><span class="dot-sep">•</span><span>NYX</span><span class="dot-sep">•</span><span>Sri Lanka</span><span class="dot-sep">•</span>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track">
+  <span>Software Engineering Student</span><b>•</b><span>Creative Technologist</span><b>•</b><span>NIBM</span><b>•</b><span>BLVND</span><b>•</b><span>NYX</span><b>•</b><span>Sri Lanka</span><b>•</b>
+  <span>Software Engineering Student</span><b>•</b><span>Creative Technologist</span><b>•</b><span>NIBM</span><b>•</b><span>BLVND</span><b>•</b><span>NYX</span><b>•</b><span>Sri Lanka</span><b>•</b>
 </div></div>
-<section id="work"><div class="wrap">
-  <div class="section-head reveal"><h2>Selected Work</h2><p>Two focused projects. One live web experience and one physical interactive system.</p></div>
-  <div class="project blvnd reveal" id="work-blvnd">
-    <div class="project-top"><div class="project-kicker"><span class="chip number">01</span><span class="chip accent">BLVND</span><span class="chip">Arena</span><span class="chip">Web Experience</span><span class="chip">2026</span></div><h3>BLVND</h3><p class="role-line">Gaming arena web experience, Galle, Sri Lanka</p>
-      <div class="visual-stage live-stage"><div class="site-frame"><div class="site-bar"><i></i><i></i><i></i><b>BLVND.ONLINE</b></div><iframe src="https://blvnd.online" title="BLVND live website preview" loading="lazy"></iframe><div class="frame-fallback"><strong>BLVND</strong><span>LIVE WEBSITE</span><a href="https://blvnd.online" target="_blank" rel="noopener">OPEN SITE ↗</a></div></div><div class="placeholder-note">LIVE PREVIEW / BLVND.ONLINE</div></div>
-    </div>
-    <div class="grid-2col"><div class="g-item reveal"><div class="g-label">The Idea</div><p>A dedicated digital experience for BLVND Arena, built around gaming sessions, venue identity and direct navigation.</p></div><div class="g-item reveal"><div class="g-label">The Problem</div><p>The venue needed a distinctive web presence with an arcade focused visual language instead of a generic business template.</p></div><div class="g-item reveal"><div class="g-label">Role & Stack</div><ul><li>Design + visual direction</li><li>HTML / CSS / JavaScript</li><li>Motion + interaction</li><li>GitHub Pages deployment</li></ul></div><div class="g-item reveal"><div class="g-label">Result</div><p>A live public website built end to end, from visual system and interaction design through deployment.</p></div></div>
-    <div class="project-cta"><span class="role-line">blvnd.online</span><a href="https://blvnd.online" target="_blank" rel="noopener" class="visit" data-hover>Visit BLVND.online ↗</a></div>
+
+<section id="work" class="section">
+  <div class="wrap">
+    <header class="section-head reveal"><div><p class="eyebrow">01 / Selected work</p><h2>Built. Shipped.<br>Still evolving.</h2></div><p>Two projects show the range, from a live gaming brand experience to a physical interactive system.</p></header>
+
+    <article class="project blvnd reveal" id="work-blvnd">
+      <div class="project-main">
+        <div class="project-meta"><span class="number">01</span><span>BLVND</span><span>Web Experience</span><span>2026</span></div>
+        <h3>BLVND</h3>
+        <p class="project-sub">A gaming arena website built around the identity and energy of BLVND Arena, Galle.</p>
+        <div class="live-preview">
+          <div class="browser-top"><i></i><i></i><i></i><span>BLVND.ONLINE</span><a href="https://blvnd.online" target="_blank" rel="noopener" data-cursor="OPEN">OPEN ↗</a></div>
+          <iframe src="https://blvnd.online" title="Live BLVND website preview" loading="lazy"></iframe>
+          <div class="preview-fallback"><strong>BLVND</strong><span>LIVE WEB EXPERIENCE</span><a href="https://blvnd.online" target="_blank" rel="noopener">OPEN BLVND.ONLINE ↗</a></div>
+          <small>LIVE PREVIEW / BLVND.ONLINE</small>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div><p class="detail-label">01 / Idea</p><p>A dedicated digital home for BLVND Arena, designed around gaming sessions, identity and direct navigation.</p></div>
+        <div><p class="detail-label">02 / Role</p><ul><li>Visual direction</li><li>UI design</li><li>HTML / CSS / JavaScript</li><li>Motion and interaction</li><li>GitHub Pages deployment</li></ul></div>
+        <div><p class="detail-label">03 / Outcome</p><p>A live public website built from concept through deployment.</p></div>
+      </div>
+      <div class="project-footer"><span>blvnd.online</span><a href="https://blvnd.online" target="_blank" rel="noopener" data-cursor="OPEN">Visit live site ↗</a></div>
+    </article>
+
+    <article class="project nyx reveal" id="work-nyx">
+      <div class="project-main">
+        <div class="project-meta"><span class="number">02</span><span>NYX</span><span>Desktop Pet</span><span>Embedded Systems</span></div>
+        <h3>NYX</h3>
+        <p class="project-sub">A physical desktop companion built with Arduino Nano, animated OLED eyes, touch and proximity sensing.</p>
+        <div class="nyx-lab" id="nyxLab">
+          <div class="nyx-stage" id="nyxPet" tabindex="0" aria-label="Interactive NYX desktop pet">
+            <div class="pet-aura"></div>
+            <div class="pet-shell">
+              <div class="pet-antenna"><i></i></div>
+              <div class="pet-face">
+                <div class="eye left-eye"><i></i></div>
+                <div class="eye right-eye"><i></i></div>
+                <div class="pet-mouth"></div>
+              </div>
+              <div class="pet-ear left-ear"></div><div class="pet-ear right-ear"></div>
+              <div class="pet-base"><span>NYX</span><b>002</b></div>
+            </div>
+            <div class="pet-sparks" id="petSparks"></div>
+            <p class="pet-prompt" id="petPrompt">MOVE YOUR CURSOR OVER NYX</p>
+          </div>
+          <div class="nyx-telemetry">
+            <div><span>STATE</span><strong id="nyxState">CURIOUS</strong></div>
+            <div><span>ATTENTION</span><strong id="nyxAttention">LOCKED</strong></div>
+            <div><span>INTERACTION</span><strong id="nyxInteraction">0</strong></div>
+            <div class="telemetry-help"><span>PET / TOUCH / DISTURB</span><small>Move over the eyes. Click to interact. Hold to annoy NYX.</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div><p class="detail-label">01 / Hardware</p><ul><li>Arduino Nano V3</li><li>128×64 OLED / SSD1306</li><li>SG90 pan servo</li><li>Touch sensors</li><li>HC-SR04 ultrasonic sensor</li><li>Buzzers</li></ul></div>
+        <div><p class="detail-label">02 / Behavior</p><p>Touch triggers motion and sound. Proximity changes the expression. The physical system uses rule-based interaction states.</p></div>
+        <div><p class="detail-label">03 / Expressions</p><div class="chips"><span>Normal</span><span>Blink</span><span>Look L / R</span><span>Happy</span><span>Excited</span><span>Curious</span></div></div>
+      </div>
+      <div class="project-footer"><span>NYX / embedded project</span><a href="https://github.com/AlphaOshyy/Nyx" target="_blank" rel="noopener" data-cursor="OPEN">View project ↗</a></div>
+    </article>
   </div>
-  <div class="project nyx reveal" id="work-nyx">
-    <div class="project-top"><div class="project-kicker"><span class="chip number">02</span><span class="chip accent">NYX</span><span class="chip">Desktop Pet</span><span class="chip">Robotics</span><span class="chip">Embedded</span></div><h3>NYX</h3><p class="role-line">Interactive desktop pet, Arduino Nano, OLED eyes, touch and proximity awareness</p>
-      <div class="visual-stage"><div class="nyx-schematic"><div class="nyx-device"><div class="antenna"></div><div class="nyx-eyes"><i></i><i></i></div><div class="sensor"></div><span class="device-label">NYX / 002</span></div><div class="schematic-label l">OLED / SSD1306<br>ANIMATED EYES</div><div class="schematic-label r">HC-SR04<br>PROXIMITY</div><div class="schematic-label b">ARDUINO NANO<br>CONTROL SYSTEM</div></div><div class="placeholder-note">SYSTEM VISUAL / HARDWARE STUDY</div></div>
-    </div>
-    <div class="grid-2col"><div class="g-item reveal"><div class="g-label">The Idea</div><p>A small physical companion that lives on the desk and responds to touch and nearby movement through expressions and motion.</p></div><div class="g-item reveal"><div class="g-label">Hardware</div><ul><li>Arduino Nano V3</li><li>128×64 OLED / SSD1306</li><li>SG90 pan servo</li><li>3 touch sensors</li><li>HC-SR04 ultrasonic sensor</li><li>2 buzzers</li></ul></div><div class="g-item reveal"><div class="g-label">Behavior</div><p>Touch triggers head movement and sound. Proximity within 30cm switches NYX into a curious expression.</p></div><div class="g-item reveal"><div class="g-label">Expressions</div><div class="expr-row"><span>Normal</span><span>Blink</span><span>Look L / R</span><span>Happy</span><span>Excited</span><span>Curious</span></div></div></div>
-    <div class="project-cta"><span class="role-line">NYX / embedded project</span><a class="visit" href="https://github.com/AlphaOshyy/Nyx" target="_blank" rel="noopener" data-hover>View Project ↗</a></div>
+</section>
+
+<section id="recognition" class="section recognition-section">
+  <div class="wrap">
+    <header class="section-head reveal"><div><p class="eyebrow">02 / Recognition</p><h2>Proof of work.</h2></div><p>The award module is built into the template now. Exact award details will be inserted with your real certificate data.</p></header>
+    <article class="award-card reveal">
+      <div class="award-top"><span class="award-index">RECOGNITION / 01</span><span class="award-year">2026</span></div>
+      <div class="award-body">
+        <div class="award-seal"><div>★</div><span>AWARD</span></div>
+        <div class="award-copy"><p class="eyebrow">Award title</p><h3>YOUR AWARD<br>GOES HERE</h3><p class="award-event">Event or organization · Year</p><p class="award-desc">Certificate image and verified achievement details will replace this template block when you add the real award data.</p></div>
+        <div class="award-code"><span>STATUS</span><strong>RECOGNIZED</strong><span>ENTRY</span><strong>01 / 01</strong></div>
+      </div>
+      <div class="award-footer"><span>RECOGNITION MODULE / READY</span><span>DATA SLOT / AWARD_01</span></div>
+    </article>
   </div>
-</div></section>
-<section id="about"><div class="wrap"><div class="section-head reveal"><h2>About</h2></div><div class="about-grid"><div class="reveal"><h2 class="bio"><span class="hi">I'm Nova</span>, the working identity of Oshan Tanusha, a Software Engineering student building digital experiences and interactive technology.</h2><div class="bio-meta"><div class="row"><span>Studying</span><b>HND Software Engineering</b></div><div class="row"><span>Institution</span><b>NIBM / 24.3F</b></div><div class="row"><span>Building</span><b>Web + embedded systems</b></div><div class="row"><span>Interested in</span><b>Interaction, robotics, brand + motion</b></div></div></div><div class="reveal"><p class="eyebrow">Current Status</p><div class="status-block"><div class="big">Software Engineering Student</div></div><div class="status-loop"><span>Building</span><span>Learning</span><span>Experimenting</span></div><div class="skills"><p class="eyebrow">Skills</p><div class="skill-groups"><div class="sg reveal"><div class="g-label">Development</div><ul><li>HTML</li><li>CSS</li><li>JavaScript</li><li>C#</li><li>Python</li><li>Git / GitHub</li></ul></div><div class="sg reveal"><div class="g-label">Embedded</div><ul><li>Arduino</li><li>Embedded C/C++</li><li>Sensors</li><li>Servo systems</li><li>OLED interfaces</li></ul></div><div class="sg reveal"><div class="g-label">Creative</div><ul><li>UI Design</li><li>Visual Design</li><li>Motion</li><li>Brand Identity</li><li>Creative Direction</li></ul></div></div></div></div></div></div></section>
-<section id="resume"><div class="wrap reveal resume-card"><div><p class="eyebrow">Resume</p><h2>The short version.</h2><p>Name, education, skills, projects and links in one document.</p></div><a href="#" class="btn solid" data-hover>Download CV ↗</a></div></section>
-<section id="contact"><div class="wrap reveal"><p class="eyebrow">Get in touch</p><h2>LET'S<br>BUILD.</h2><p class="sub">Open to collaborations, internships and interesting problems.</p><div class="contact-links"><a href="mailto:oshantanusha38@gmail.com" data-hover>Email</a><a href="https://github.com/AlphaOshyy" target="_blank" rel="noopener" data-hover>GitHub</a><a href="https://www.linkedin.com/in/oshantanusha/" target="_blank" rel="noopener" data-hover>LinkedIn</a></div></div></section>
-<footer><span class="logo">NOVA</span><ul><li><span>© 2026</span></li><li><a href="https://github.com/AlphaOshyy" target="_blank" rel="noopener">GitHub</a></li><li><a href="https://www.linkedin.com/in/oshantanusha/" target="_blank" rel="noopener">LinkedIn</a></li><li><a href="mailto:oshantanusha38@gmail.com">Email</a></li><li><span>Sri Lanka</span></li></ul></footer>
+</section>
+
+<section id="about" class="section">
+  <div class="wrap">
+    <header class="section-head reveal"><div><p class="eyebrow">03 / About</p><h2>Nova is the<br>working identity.</h2></div></header>
+    <div class="about-grid">
+      <div class="reveal"><p class="bio"><span>I'm Nova</span>, the working identity of Oshan Tanusha. I'm a Software Engineering student at NIBM focused on digital experiences, interactive systems and creative technology.</p><div class="bio-list"><div><span>Studying</span><b>Software Engineering</b></div><div><span>Institution</span><b>NIBM</b></div><div><span>Building</span><b>Web + embedded systems</b></div><div><span>Interested in</span><b>Interaction, robotics, brand + motion</b></div></div></div>
+      <div class="reveal"><p class="eyebrow">Current status</p><h3 class="status-title">Building systems that respond.</h3><div class="status-tags"><span>BUILDING</span><span>LEARNING</span><span>EXPERIMENTING</span></div><div class="skill-grid"><div><p>Development</p><span>HTML</span><span>CSS</span><span>JavaScript</span><span>C#</span><span>Python</span><span>Git / GitHub</span></div><div><p>Embedded</p><span>Arduino</span><span>Embedded C/C++</span><span>Sensors</span><span>Servo systems</span><span>OLED</span></div><div><p>Creative</p><span>UI Design</span><span>Visual Design</span><span>Motion</span><span>Brand Identity</span><span>Creative Direction</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEMPORARILY DISABLED: RESUME / CV SECTION. RESTORE WHEN THE FINAL CV IS READY.
+<section id="resume" class="section"><div class="wrap resume-card"><p class="eyebrow">Resume</p><h2>The short version.</h2><a class="button primary" href="resume.pdf">Download CV ↗</a></div></section>
+-->
+
+<section id="contact" class="section contact">
+  <div class="wrap reveal"><p class="eyebrow">04 / Get in touch</p><h2>LET'S<br>BUILD.</h2><p>Open to collaborations, internships and interesting problems.</p><div class="contact-links"><a href="mailto:oshantanusha38@gmail.com" data-cursor="MAIL">Email ↗</a><a href="https://github.com/AlphaOshyy" target="_blank" rel="noopener" data-cursor="OPEN">GitHub ↗</a><a href="https://www.linkedin.com/in/oshantanusha/" target="_blank" rel="noopener" data-cursor="OPEN">LinkedIn ↗</a></div></div>
+</section>
+</main>
+
+<footer><a href="#hero" class="brand">NOVA</a><div><span>© 2026</span><a href="https://github.com/AlphaOshyy" target="_blank" rel="noopener">GitHub</a><a href="mailto:oshantanusha38@gmail.com">Email</a><span>Sri Lanka</span></div></footer>
 <script src="script.js"></script>
 </body>
 </html>
