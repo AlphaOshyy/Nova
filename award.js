@@ -25,5 +25,4 @@ if(!coarse&&!reduced){$$('.project').forEach(card=>{card.addEventListener('mouse
 const anchors=$$('a,button');anchors.forEach(el=>{el.addEventListener('focus',()=>el.classList.add('award-focus'));el.addEventListener('blur',()=>el.classList.remove('award-focus'))});
 const sections=$$('section[id]');if('IntersectionObserver'in window){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.style.setProperty('--section-progress',Math.min(1,Math.max(0,(innerHeight-e.boundingClientRect.top)/(innerHeight+e.boundingClientRect.height))))}),{threshold:[0,.25,.5,.75,1]});sections.forEach(s=>ob.observe(s))}
 const portraitArt=$('.portrait-art');if(portraitArt&&!portraitArt.querySelector('.portrait-photo-local')){const wrap=document.createElement('div');wrap.className='portrait-photo-local';const img=document.createElement('img');img.src='assets/oshan.jpg';img.alt='Oshan Tanusha';img.loading='eager';img.decoding='async';wrap.appendChild(img);portraitArt.appendChild(wrap)}
-const aboutBio=$('.about-section .bio');if(aboutBio)aboutBio.remove();
 })();
