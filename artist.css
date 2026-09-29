@@ -87,3 +87,7 @@ main{position:relative;z-index:1}.hero-copy,.artist-frame,.release,.about-grid,.
 
 /* INVISIBLE PROFESSIONAL POINTER */
 @media(min-width:901px){.nova-cursor,.nova-cursor-trail{display:block!important;visibility:hidden!important;opacity:0!important}}
+
+/* CLEAN POINTER: particles only, no cursor rings */
+.nova-field .field-core{display:none!important}
+.nova-cursor,.nova-cursor-trail{display:none!important;opacity:0!important;visibility:hidden!important}
