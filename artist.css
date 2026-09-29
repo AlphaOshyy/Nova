@@ -1,4 +1,4 @@
-:root{--bg:#090909;--fg:#f2f0eb;--muted:#858585;--line:rgba(242,240,235,.14);--accent:#d9ff00;--display:'Anton',Impact,sans-serif;--body:'Inter',Arial,sans-serif}
+:root{--bg:#090909;--fg:#f2f0eb;--muted:#858585;--line:rgba(242,240,235,.14);--accent:#b9f3ff;--display:'Anton',Impact,sans-serif;--body:'Inter',Arial,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);overflow-x:hidden}
